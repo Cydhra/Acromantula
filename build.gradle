@@ -2,6 +2,7 @@ buildscript {
     ext {
         kotlin_version = '1.4.10'
         serialization_version = '1.0.0'
+        coroutines_version = '1.3.5'
         jvm_target = '1.8'
         junit_version = '5.2.0'
         log4j2_version = '2.11.1'
@@ -24,11 +25,11 @@ buildscript {
 }
 
 apply plugin: 'kotlin'
+apply plugin: 'org.jetbrains.kotlin.kapt'
 apply plugin: 'kotlinx-serialization'
 
 allprojects {
     apply plugin: 'kotlin'
-    apply plugin: 'kotlinx-serialization'
 
     group 'net.cydhra'
     version '0.1.0'
@@ -56,7 +57,7 @@ project("acromantula_backend") {
             artifact = "com.google.protobuf:protoc:$protobuf_version"
         }
         generateProtoTasks {
-            all().forEach {
+            ofSourceSet("main").forEach {
                 it.generateDescriptorSet = true
                 it.descriptorSetOptions.includeSourceInfo = true
             }
@@ -74,7 +75,7 @@ project("acromantula_backend") {
             dependencies {
                 // kotlin
                 implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
-                implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.3.5'
+                implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutines_version
                 implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-serialization-protobuf',
                         version: serialization_version
 
@@ -123,7 +124,14 @@ project("acromantula_backend") {
         }
 
         test {
-
+            compileClasspath += sourceSets.bus.runtimeClasspath
+            compileClasspath += sourceSets.workspace.runtimeClasspath
+            compileClasspath += sourceSets.features.runtimeClasspath
+            compileClasspath += sourceSets.main.runtimeClasspath
+            runtimeClasspath += sourceSets.bus.runtimeClasspath
+            runtimeClasspath += sourceSets.workspace.runtimeClasspath
+            runtimeClasspath += sourceSets.features.runtimeClasspath
+            runtimeClasspath += sourceSets.main.runtimeClasspath
         }
     }
 
@@ -131,7 +139,8 @@ project("acromantula_backend") {
     dependencies {
         // kotlin
         implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'
-        implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.3.5'
+        implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutines_version
+        implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-guava', version: coroutines_version
         implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-serialization-protobuf',
                 version: serialization_version
 
@@ -142,6 +151,7 @@ project("acromantula_backend") {
         implementation group: 'io.grpc', name: 'grpc-netty', version: grpc_version
         implementation group: 'io.grpc', name: 'grpc-kotlin-stub', version: grpc_kotlin_version
         implementation group: 'com.github.google', name: 'grpc-kapt', version: grpc_kapt_version
+        kapt group: 'com.github.google.grpc-kapt', name: 'processor', version: grpc_kapt_version
 
         // utility
         implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'

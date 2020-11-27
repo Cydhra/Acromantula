@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package net.cydhra.acromantula;
+
+option java_multiple_files = true;
+
+service ImportService {
+    rpc Import (ImportMessage) returns (ImportAnswer);
+}
+
+message ImportMessage {
+    int32 directoryId = 1;
+    string directoryPath = 2;
+    string fileUrl = 3;
+}
+
+message ImportAnswer {
+    // TODO define task API and return the task here
+}
