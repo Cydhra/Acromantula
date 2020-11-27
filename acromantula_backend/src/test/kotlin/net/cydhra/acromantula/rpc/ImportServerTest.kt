@@ -26,7 +26,7 @@ class ImportServerTest {
                     client.import(
                         ImportMessage.newBuilder()
                             .setDirectoryId(-1)
-                            .setFileUrl(this.javaClass.getResource("testfile.txt").toExternalForm())
+                            .setFileUrl(this.javaClass.classLoader.getResource("testfile.txt")!!.toExternalForm())
                             .build()
                     )
                 }
