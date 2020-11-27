@@ -10,6 +10,7 @@ buildscript {
         protobuf_version = '3.13.0'
         grpc_version = '1.33.1'
         grpc_kotlin_version = '0.2.1'
+        grpc_kapt_version = 'b9f3a946c1'
     }
 
     repositories {
@@ -35,6 +36,7 @@ allprojects {
     repositories {
         jcenter()
         maven { url 'https://dl.bintray.com/kotlin/exposed/' }
+        maven { url 'https://jitpack.io' }
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -46,28 +48,24 @@ allprojects {
 
 project("acromantula_backend") {
     apply plugin: 'java'
+    apply plugin: 'org.jetbrains.kotlin.kapt'
     apply plugin: 'com.google.protobuf'
 
     protobuf {
         protoc {
             artifact = "com.google.protobuf:protoc:$protobuf_version"
         }
-
-        plugins {
-            grpc {
-                artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
-            }
-            grpckt {
-                artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpc_kotlin_version:jdk7@jar"
-            }
-        }
         generateProtoTasks {
             all().forEach {
-                it.plugins {
-                    grpc
-                    grpckt
-                }
+                it.generateDescriptorSet = true
+                it.descriptorSetOptions.includeSourceInfo = true
             }
+        }
+    }
+
+    kapt {
+        arguments {
+            arg("protos", "$buildDir/generated/source/proto/main/descriptor_set.desc")
         }
     }
 
@@ -143,6 +141,7 @@ project("acromantula_backend") {
         // grpc
         implementation group: 'io.grpc', name: 'grpc-netty', version: grpc_version
         implementation group: 'io.grpc', name: 'grpc-kotlin-stub', version: grpc_kotlin_version
+        implementation group: 'com.github.google', name: 'grpc-kapt', version: grpc_kapt_version
 
         // utility
         implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
